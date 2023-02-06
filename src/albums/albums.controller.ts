@@ -1,34 +1,68 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Put,
+  Param,
+  Delete,
+  NotFoundException,
+  HttpCode,
+  HttpStatus,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import { AlbumsService } from './albums.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 
-@Controller('albums')
+@Controller('album')
 export class AlbumsController {
   constructor(private readonly albumsService: AlbumsService) {}
 
   @Post()
-  create(@Body() createAlbumDto: CreateAlbumDto) {
+  async create(@Body() createAlbumDto: CreateAlbumDto) {
     return this.albumsService.create(createAlbumDto);
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.albumsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.albumsService.findOne(+id);
+  async findOne(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+    const album = await this.albumsService.findOne(id);
+
+    if (!album) {
+      throw new NotFoundException('This track does not exist');
+    }
+
+    return album;
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAlbumDto: UpdateAlbumDto) {
-    return this.albumsService.update(+id, updateAlbumDto);
+  @Put(':id')
+  async update(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() updateAlbumDto: UpdateAlbumDto,
+  ) {
+    const album = await this.albumsService.findOne(id);
+
+    if (!album) {
+      throw new NotFoundException('This album does not exist');
+    }
+
+    return this.albumsService.update(id, updateAlbumDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.albumsService.remove(+id);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+    const album = await this.albumsService.findOne(id);
+
+    if (!album) {
+      throw new NotFoundException('This album does not exist');
+    }
+
+    await this.albumsService.remove(id);
   }
 }

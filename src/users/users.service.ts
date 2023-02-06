@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserPasswordDto } from './dto/update-user-password.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 import { User } from './entities/user.entity';
 
 @Injectable()
@@ -17,23 +18,50 @@ export class UsersService {
   ];
 
   create(createUserDto: CreateUserDto) {
-    Date.now();
-    return 'This action adds a new user';
+    const user: User = {
+      ...createUserDto,
+      id: randomUUID(),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      version: 1,
+    };
+    this.users.push(user);
+
+    return user;
   }
 
-  findAll() {
+  async findAll() {
     return this.users;
   }
 
-  findOne(id: string) {
-    return this.users.find((user) => user.id === id);
+  async findOne(id: string) {
+    const user = this.users.find((user) => user.id === id);
+
+    return user;
   }
 
-  update(id: number, updateUserPasswordDto: UpdateUserPasswordDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updatePasswordDto: UpdatePasswordDto) {
+    let updatedUser: User;
+
+    this.users = this.users.map((user) => {
+      if (user.id === id) {
+        updatedUser = {
+          ...user,
+          updatedAt: Date.now(),
+          version: user.version + 1,
+          password: updatePasswordDto.newPassword,
+        };
+
+        return updatedUser;
+      }
+
+      return user;
+    });
+
+    return updatedUser;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  remove(id: string) {
+    this.users = this.users.filter((user) => user.id !== id);
   }
 }

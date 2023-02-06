@@ -3,44 +3,80 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  Put,
   Param,
   Delete,
+  NotFoundException,
+  ForbiddenException,
+  UseInterceptors,
+  ClassSerializerInterceptor,
+  HttpCode,
+  HttpStatus,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserPasswordDto } from './dto/update-user-password.dto';
-import { ParseUUIDPipe } from '@nestjs/common/pipes';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 
-@Controller('users')
+@Controller('user')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
+  async create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get()
-  findAll() {
+  async findAll() {
     return this.usersService.findAll();
   }
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get(':id')
   async findOne(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     const user = await this.usersService.findOne(id);
+
+    if (!user) {
+      throw new NotFoundException('This user does not exist');
+    }
+
+    return new User(user);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateUserPasswordDto: UpdateUserPasswordDto,
+  @UseInterceptors(ClassSerializerInterceptor)
+  @Put(':id')
+  async update(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() updatePasswordDto: UpdatePasswordDto,
   ) {
-    return this.usersService.update(+id, updateUserPasswordDto);
+    const user = await this.usersService.findOne(id);
+
+    if (!user) {
+      throw new NotFoundException('This user does not exist');
+    }
+
+    if (user.password !== updatePasswordDto.oldPassword) {
+      throw new ForbiddenException('Invalid password');
+    }
+
+    return new User(await this.usersService.update(id, updatePasswordDto));
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+    const user = await this.usersService.findOne(id);
+
+    if (!user) {
+      throw new NotFoundException('This user does not exist');
+    }
+
+    await this.usersService.remove(id);
+
+    return 'The user has been deleted';
   }
 }

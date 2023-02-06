@@ -1,34 +1,68 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Put,
+  Param,
+  Delete,
+  NotFoundException,
+  HttpCode,
+  HttpStatus,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import { TracksService } from './tracks.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 
-@Controller('tracks')
+@Controller('track')
 export class TracksController {
   constructor(private readonly tracksService: TracksService) {}
 
   @Post()
-  create(@Body() createTrackDto: CreateTrackDto) {
+  async create(@Body() createTrackDto: CreateTrackDto) {
     return this.tracksService.create(createTrackDto);
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.tracksService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.tracksService.findOne(+id);
+  async findOne(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+    const track = await this.tracksService.findOne(id);
+
+    if (!track) {
+      throw new NotFoundException('This track does not exist');
+    }
+
+    return track;
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTrackDto: UpdateTrackDto) {
-    return this.tracksService.update(+id, updateTrackDto);
+  @Put(':id')
+  async update(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() updateTrackDto: UpdateTrackDto,
+  ) {
+    const track = await this.tracksService.findOne(id);
+
+    if (!track) {
+      throw new NotFoundException('This track does not exist');
+    }
+
+    return this.tracksService.update(id, updateTrackDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.tracksService.remove(+id);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+    const track = await this.tracksService.findOne(id);
+
+    if (!track) {
+      throw new NotFoundException('This track does not exist');
+    }
+
+    await this.tracksService.remove(id);
   }
 }
