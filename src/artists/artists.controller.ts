@@ -11,6 +11,9 @@ import {
   HttpStatus,
   ParseUUIDPipe,
 } from '@nestjs/common';
+import { AlbumsService } from 'src/albums/albums.service';
+import { FavoritesService } from 'src/favorites/favorites.service';
+import { TracksService } from 'src/tracks/tracks.service';
 
 import { ArtistsService } from './artists.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
@@ -18,7 +21,12 @@ import { UpdateArtistDto } from './dto/update-artist.dto';
 
 @Controller('artist')
 export class ArtistsController {
-  constructor(private readonly artistsService: ArtistsService) {}
+  constructor(
+    private readonly artistsService: ArtistsService,
+    private readonly favoritesService: FavoritesService,
+    private readonly tracksService: TracksService,
+    private readonly albumsService: AlbumsService,
+  ) {}
 
   @Post()
   async create(@Body() createArtistDto: CreateArtistDto) {
@@ -57,7 +65,7 @@ export class ArtistsController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     const artist = await this.artistsService.findOne(id);
 
     if (!artist) {
@@ -65,5 +73,8 @@ export class ArtistsController {
     }
 
     await this.artistsService.remove(id);
+    await this.favoritesService.remove('artists', id);
+    await this.tracksService.removeDependencies('artistId', id);
+    await this.albumsService.removeDependencies('artistId', id);
   }
 }

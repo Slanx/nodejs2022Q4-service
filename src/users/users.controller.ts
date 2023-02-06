@@ -26,7 +26,7 @@ export class UsersController {
   @UseInterceptors(ClassSerializerInterceptor)
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+    return new User(this.usersService.create(createUserDto));
   }
 
   @UseInterceptors(ClassSerializerInterceptor)

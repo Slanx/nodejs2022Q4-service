@@ -6,13 +6,7 @@ import { Artist } from './entities/artist.entity';
 
 @Injectable()
 export class ArtistsService {
-  private artists: Artist[] = [
-    {
-      id: '5dee1117-5ecb-42e2-a546-1a20fa113750',
-      name: 'Aqua',
-      grammy: false,
-    },
-  ];
+  private artists: Artist[] = [];
   create(createArtistDto: CreateArtistDto) {
     const artist: Artist = {
       ...createArtistDto,
@@ -27,11 +21,11 @@ export class ArtistsService {
     return this.artists;
   }
 
-  findOne(id: string) {
+  findOne = (id: string) => {
     const artist = this.artists.find((artist) => artist.id === id);
 
     return artist;
-  }
+  };
 
   update(id: string, updateArtistDto: UpdateArtistDto) {
     let updatedArtist: Artist;

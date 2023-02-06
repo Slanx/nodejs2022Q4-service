@@ -6,15 +6,7 @@ import { Track } from './entities/track.entity';
 
 @Injectable()
 export class TracksService {
-  private tracks: Track[] = [
-    {
-      id: '046a2c7e-f27a-4b91-baff-a2ef283091e4',
-      name: 'Roses are red',
-      duration: 208,
-      albumId: null,
-      artistId: null,
-    },
-  ];
+  private tracks: Track[] = [];
 
   create(createTrackDto: CreateTrackDto) {
     const track: Track = {
@@ -30,11 +22,11 @@ export class TracksService {
     return this.tracks;
   }
 
-  findOne(id: string) {
+  findOne = (id: string) => {
     const track = this.tracks.find((track) => track.id === id);
 
     return track;
-  }
+  };
 
   update(id: string, updateTrackDto: UpdateTrackDto) {
     let updatedTrack: Track;
@@ -58,4 +50,13 @@ export class TracksService {
   remove(id: string) {
     this.tracks = this.tracks.filter((track) => track.id !== id);
   }
+
+  removeDependencies = async <T extends keyof Track>(
+    dependency: T,
+    id: string,
+  ) => {
+    this.tracks.forEach((track) => {
+      if (track[dependency] === id) track[dependency] = null;
+    });
+  };
 }

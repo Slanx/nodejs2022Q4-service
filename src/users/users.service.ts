@@ -6,16 +6,7 @@ import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
-  private users: User[] = [
-    {
-      id: '835b1e81-5dd5-458b-8e4e-7776e069eefd',
-      login: 'Rafa',
-      password: 'qwerty123',
-      version: 1,
-      createdAt: 1519129853500,
-      updatedAt: 1519129853500,
-    },
-  ];
+  private users: User[] = [];
 
   create(createUserDto: CreateUserDto) {
     const user: User = {
@@ -34,11 +25,11 @@ export class UsersService {
     return this.users;
   }
 
-  async findOne(id: string) {
+  findOne = (id: string) => {
     const user = this.users.find((user) => user.id === id);
 
     return user;
-  }
+  };
 
   async update(id: string, updatePasswordDto: UpdatePasswordDto) {
     let updatedUser: User;

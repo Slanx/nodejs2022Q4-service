@@ -1,26 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { CreateFavoriteDto } from './dto/create-favorite.dto';
-import { UpdateFavoriteDto } from './dto/update-favorite.dto';
+import { Favorites } from './entities/favorite.entity';
 
 @Injectable()
 export class FavoritesService {
-  create(createFavoriteDto: CreateFavoriteDto) {
-    return 'This action adds a new favorite';
+  private favorites: Favorites = {
+    albums: [],
+    artists: [],
+    tracks: [],
+  };
+
+  async create<T extends keyof Favorites>(key: T, id: string) {
+    this.favorites[key].push(id);
   }
 
-  findAll() {
-    return `This action returns all favorites`;
-  }
+  findAll = async () => {
+    return this.favorites;
+  };
 
-  findOne(id: number) {
-    return `This action returns a #${id} favorite`;
-  }
+  findOne = async <T extends keyof Favorites>(key: T, id: string) => {
+    return await this.favorites[key].find((favorite) => favorite === id);
+  };
 
-  update(id: number, updateFavoriteDto: UpdateFavoriteDto) {
-    return `This action updates a #${id} favorite`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} favorite`;
-  }
+  remove = async <T extends keyof Favorites>(key: T, id: string) => {
+    await this.favorites[key].filter((favorite) => favorite !== id);
+  };
 }
