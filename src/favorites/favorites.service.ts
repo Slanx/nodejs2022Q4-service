@@ -1,27 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { Favorites } from './entities/favorite.entity';
+import { DbService } from 'src/db/db.service';
 
 @Injectable()
 export class FavoritesService {
-  private favorites: Favorites = {
-    albums: [],
-    artists: [],
-    tracks: [],
-  };
+  constructor(private readonly db: DbService) {}
 
   async create<T extends keyof Favorites>(key: T, id: string) {
-    this.favorites[key].push(id);
+    this.db.favorites[key].push(id);
   }
 
-  findAll = async () => {
-    return this.favorites;
-  };
+  async findAll() {
+    return this.db.favorites;
+  }
 
-  findOne = async <T extends keyof Favorites>(key: T, id: string) => {
-    return await this.favorites[key].find((favorite) => favorite === id);
-  };
+  async findOne<T extends keyof Favorites>(key: T, id: string) {
+    return this.db.favorites[key].find((favorite) => favorite === id);
+  }
 
-  remove = async <T extends keyof Favorites>(key: T, id: string) => {
-    await this.favorites[key].filter((favorite) => favorite !== id);
-  };
+  async remove<T extends keyof Favorites>(key: T, id: string) {
+    this.db.favorites[key] = this.db.favorites[key].filter((favorite) => {
+      favorite !== id;
+    });
+  }
 }

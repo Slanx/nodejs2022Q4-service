@@ -87,6 +87,7 @@ export class FavoritesController {
   }
 
   @Delete('track/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     const track = await this.favoritesService.findOne('tracks', id);
 

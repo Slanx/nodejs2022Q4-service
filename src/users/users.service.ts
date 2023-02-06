@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
+import { DbService } from 'src/db/db.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
-  private users: User[] = [];
+  constructor(private readonly db: DbService) {}
 
   create(createUserDto: CreateUserDto) {
     const user: User = {
@@ -16,25 +17,25 @@ export class UsersService {
       updatedAt: Date.now(),
       version: 1,
     };
-    this.users.push(user);
+    this.db.users.push(new User(user));
 
     return user;
   }
 
   async findAll() {
-    return this.users;
+    return this.db.users;
   }
 
-  findOne = (id: string) => {
-    const user = this.users.find((user) => user.id === id);
+  async findOne(id: string) {
+    const user = this.db.users.find((user) => user.id === id);
 
     return user;
-  };
+  }
 
   async update(id: string, updatePasswordDto: UpdatePasswordDto) {
     let updatedUser: User;
 
-    this.users = this.users.map((user) => {
+    this.db.users = this.db.users.map((user) => {
       if (user.id === id) {
         updatedUser = {
           ...user,
@@ -52,7 +53,7 @@ export class UsersService {
     return updatedUser;
   }
 
-  remove(id: string) {
-    this.users = this.users.filter((user) => user.id !== id);
+  async remove(id: string) {
+    this.db.users = this.db.users.filter((user) => user.id !== id);
   }
 }

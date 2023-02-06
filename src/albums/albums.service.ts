@@ -3,35 +3,35 @@ import { randomUUID } from 'crypto';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './entities/album.entity';
+import { DbService } from 'src/db/db.service';
 
 @Injectable()
 export class AlbumsService {
-  private albums: Album[] = [];
-
+  constructor(private readonly db: DbService) {}
   create(createAlbumDto: CreateAlbumDto) {
     const album: Album = {
       ...createAlbumDto,
       id: randomUUID(),
     };
-    this.albums.push(album);
+    this.db.albums.push(album);
 
     return album;
   }
 
   findAll() {
-    return this.albums;
+    return this.db.albums;
   }
 
-  findOne = (id: string) => {
-    const album = this.albums.find((album) => album.id === id);
+  findOne(id: string) {
+    const album = this.db.albums.find((album) => album.id === id);
 
     return album;
-  };
+  }
 
   update(id: string, updateAlbumDto: UpdateAlbumDto) {
     let updatedAlbum: Album;
 
-    this.albums = this.albums.map(({ ...album }) => {
+    this.db.albums = this.db.albums.map(({ ...album }) => {
       if (album.id === id) {
         updatedAlbum = {
           ...album,
@@ -48,15 +48,12 @@ export class AlbumsService {
   }
 
   remove(id: string) {
-    this.albums = this.albums.filter((album) => album.id !== id);
+    this.db.albums = this.db.albums.filter((album) => album.id !== id);
   }
 
-  removeDependencies = async <T extends keyof Album>(
-    dependency: T,
-    id: string,
-  ) => {
-    this.albums.forEach((album) => {
+  async removeDependencies<T extends keyof Album>(dependency: T, id: string) {
+    this.db.albums.forEach((album) => {
       if (album[dependency] === id) album[dependency] = null;
     });
-  };
+  }
 }
