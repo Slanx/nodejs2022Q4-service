@@ -1,38 +1,34 @@
+import { Exclude } from 'class-transformer';
 import { Album } from 'src/albums/entities/album.entity';
 import { Artist } from 'src/artists/entities/artist.entity';
 import { Track } from 'src/tracks/entities/track.entity';
-import {
-  Entity,
-  JoinTable,
-  ManyToMany,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
-// @Entity()
-// export class FavoritesArtists {
-//   @PrimaryGeneratedColumn()
-//   id: number;
+@Entity()
+export class FavoritesArtists {
+  @PrimaryGeneratedColumn()
+  id: string;
 
-//   @OneToMany(() => Artist)
-//   artists: Artist[];
-// }
+  @OneToOne(() => Artist, { onDelete: 'CASCADE', eager: true })
+  @JoinColumn()
+  artists: Artist;
+}
 
 @Entity()
 export class FavoritesAlbums {
   @PrimaryGeneratedColumn()
-  id: number;
+  id: string;
 
-  @ManyToMany(() => Album, { eager: true })
-  @JoinTable()
-  albums: Album[];
+  @OneToOne(() => Album, { onDelete: 'CASCADE', eager: true })
+  @JoinColumn()
+  albums: Album;
 }
 
 export class FavoritesTracks {
   @PrimaryGeneratedColumn()
-  id: number;
+  id: string;
 
-  @ManyToMany(() => Track, { eager: true })
-  @JoinTable()
-  tracks: Track[];
+  @OneToOne(() => Track, { onDelete: 'CASCADE', eager: true })
+  @JoinColumn()
+  tracks: Track;
 }
