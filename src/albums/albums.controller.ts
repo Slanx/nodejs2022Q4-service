@@ -11,19 +11,13 @@ import {
   HttpStatus,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import { FavoritesService } from 'src/favorites/favorites.service';
-import { TracksService } from 'src/tracks/tracks.service';
 import { AlbumsService } from './albums.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 
 @Controller('album')
 export class AlbumsController {
-  constructor(
-    private readonly albumsService: AlbumsService,
-    private readonly favoritesService: FavoritesService,
-    private readonly tracksService: TracksService,
-  ) {}
+  constructor(private readonly albumsService: AlbumsService) {}
 
   @Post()
   async create(@Body() createAlbumDto: CreateAlbumDto) {
@@ -69,8 +63,6 @@ export class AlbumsController {
       throw new NotFoundException('This album does not exist');
     }
 
-    await this.albumsService.remove(id);
-    await this.favoritesService.remove('albums', id);
-    await this.tracksService.removeDependencies('albumId', id);
+    await this.albumsService.remove(album);
   }
 }

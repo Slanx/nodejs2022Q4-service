@@ -79,11 +79,7 @@ export class FavoritesController {
       return this.artistsService.findOne(artistId);
     });
 
-    return {
-      albums,
-      tracks,
-      artists,
-    };
+    return {};
   }
 
   @Delete('track/:id')
