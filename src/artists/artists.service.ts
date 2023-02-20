@@ -1,53 +1,40 @@
 import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'crypto';
-import { DbService } from 'src/db/db.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { Artist } from './entities/artist.entity';
 
 @Injectable()
 export class ArtistsService {
-  constructor(private readonly db: DbService) {}
-  create(createArtistDto: CreateArtistDto) {
-    const artist: Artist = {
-      ...createArtistDto,
-      id: randomUUID(),
-    };
-    this.db.artists.push(artist);
+  constructor(
+    @InjectRepository(Artist)
+    private readonly artistRepository: Repository<Artist>,
+  ) {}
+  async create(createArtistDto: CreateArtistDto) {
+    const artist = this.artistRepository.create({ ...createArtistDto });
 
-    return artist;
+    return this.artistRepository.save(artist);
   }
 
-  findAll() {
-    return this.db.artists;
+  async findAll() {
+    return this.artistRepository.find();
   }
 
-  findOne(id: string) {
-    const artist = this.db.artists.find((artist) => artist.id === id);
-
-    return artist;
+  async findOne(id: string) {
+    return this.artistRepository.findOneBy({ id });
   }
 
-  update(id: string, updateArtistDto: UpdateArtistDto) {
-    let updatedArtist: Artist;
-
-    this.db.artists = this.db.artists.map(({ ...artist }) => {
-      if (artist.id === id) {
-        updatedArtist = {
-          ...artist,
-          ...updateArtistDto,
-        };
-
-        return updatedArtist;
-      }
-
-      return artist;
+  async update(id: string, updateArtistDto: UpdateArtistDto) {
+    const artist = await this.artistRepository.preload({
+      id,
+      ...updateArtistDto,
     });
 
-    return updatedArtist;
+    return this.artistRepository.save(artist);
   }
 
-  remove(id: string) {
-    this.db.artists = this.db.artists.filter((track) => track.id !== id);
+  async remove(artist: Artist) {
+    await this.artistRepository.remove(artist);
   }
 }

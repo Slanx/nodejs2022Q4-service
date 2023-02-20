@@ -1,28 +1,41 @@
 import {
-  IsUUID,
-  IsInt,
-  IsString,
-  IsNotEmpty,
-  IsOptional,
-} from 'class-validator';
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Album } from 'src/albums/entities/album.entity';
+import { Artist } from 'src/artists/entities/artist.entity';
 
+@Entity()
 export class Track {
-  @IsUUID()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @Column()
   name: string;
 
-  @IsUUID()
-  @IsOptional()
-  artistId: string | null;
-
-  @IsUUID()
-  @IsOptional()
-  albumId: string | null;
-
-  @IsInt()
-  @IsNotEmpty()
+  @Column()
   duration: number;
+
+  @Column({ nullable: true })
+  artistId: Artist['id'] | null;
+
+  @Column({ nullable: true })
+  albumId: Album['id'] | null;
+
+  @ManyToOne(() => Artist, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn()
+  artist: Artist | null;
+
+  @ManyToOne(() => Album, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn()
+  album: Album | null;
 }

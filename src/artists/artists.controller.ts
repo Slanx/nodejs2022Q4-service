@@ -11,9 +11,6 @@ import {
   HttpStatus,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import { AlbumsService } from 'src/albums/albums.service';
-import { FavoritesService } from 'src/favorites/favorites.service';
-import { TracksService } from 'src/tracks/tracks.service';
 
 import { ArtistsService } from './artists.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
@@ -21,12 +18,7 @@ import { UpdateArtistDto } from './dto/update-artist.dto';
 
 @Controller('artist')
 export class ArtistsController {
-  constructor(
-    private readonly artistsService: ArtistsService,
-    private readonly favoritesService: FavoritesService,
-    private readonly tracksService: TracksService,
-    private readonly albumsService: AlbumsService,
-  ) {}
+  constructor(private readonly artistsService: ArtistsService) {}
 
   @Post()
   async create(@Body() createArtistDto: CreateArtistDto) {
@@ -72,9 +64,6 @@ export class ArtistsController {
       throw new NotFoundException('This artist does not exist');
     }
 
-    await this.artistsService.remove(id);
-    await this.favoritesService.remove('artists', id);
-    await this.tracksService.removeDependencies('artistId', id);
-    await this.albumsService.removeDependencies('artistId', id);
+    await this.artistsService.remove(artist);
   }
 }

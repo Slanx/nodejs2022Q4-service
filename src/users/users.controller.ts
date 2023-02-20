@@ -15,7 +15,6 @@ import {
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 
@@ -26,7 +25,7 @@ export class UsersController {
   @UseInterceptors(ClassSerializerInterceptor)
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
-    return new User(this.usersService.create(createUserDto));
+    return this.usersService.create(createUserDto);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
@@ -44,7 +43,7 @@ export class UsersController {
       throw new NotFoundException('This user does not exist');
     }
 
-    return new User(user);
+    return user;
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
@@ -63,7 +62,7 @@ export class UsersController {
       throw new ForbiddenException('Invalid password');
     }
 
-    return new User(await this.usersService.update(id, updatePasswordDto));
+    return await this.usersService.update(id, updatePasswordDto);
   }
 
   @Delete(':id')
@@ -75,8 +74,6 @@ export class UsersController {
       throw new NotFoundException('This user does not exist');
     }
 
-    await this.usersService.remove(id);
-
-    return 'The user has been deleted';
+    await this.usersService.remove(user);
   }
 }

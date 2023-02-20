@@ -14,14 +14,10 @@ import {
 import { TracksService } from './tracks.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { FavoritesService } from 'src/favorites/favorites.service';
 
 @Controller('track')
 export class TracksController {
-  constructor(
-    private readonly tracksService: TracksService,
-    private readonly favoritesService: FavoritesService,
-  ) {}
+  constructor(private readonly tracksService: TracksService) {}
 
   @Post()
   async create(@Body() createTrackDto: CreateTrackDto) {
@@ -67,7 +63,6 @@ export class TracksController {
       throw new NotFoundException('This track does not exist');
     }
 
-    await this.tracksService.remove(id);
-    await this.favoritesService.remove('tracks', id);
+    await this.tracksService.remove(track);
   }
 }

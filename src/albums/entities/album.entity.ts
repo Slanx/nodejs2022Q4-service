@@ -1,24 +1,23 @@
-import {
-  IsUUID,
-  IsInt,
-  IsString,
-  IsNotEmpty,
-  IsOptional,
-} from 'class-validator';
+import { Artist } from 'src/artists/entities/artist.entity';
+import { Column, PrimaryGeneratedColumn, ManyToOne, Entity } from 'typeorm';
 
+@Entity()
 export class Album {
-  @IsUUID()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @Column()
   name: string;
 
-  @IsInt()
-  @IsNotEmpty()
+  @Column()
   year: number;
 
-  @IsUUID()
-  @IsOptional()
-  artistId: string | null;
+  @Column({ nullable: true })
+  artistId: Artist['id'] | null;
+
+  @ManyToOne(() => Artist, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  artist: Artist | null;
 }

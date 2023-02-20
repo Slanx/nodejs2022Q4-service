@@ -1,59 +1,40 @@
 import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'crypto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './entities/album.entity';
-import { DbService } from 'src/db/db.service';
 
 @Injectable()
 export class AlbumsService {
-  constructor(private readonly db: DbService) {}
-  create(createAlbumDto: CreateAlbumDto) {
-    const album: Album = {
-      ...createAlbumDto,
-      id: randomUUID(),
-    };
-    this.db.albums.push(album);
+  constructor(
+    @InjectRepository(Album)
+    private readonly albumRepository: Repository<Album>,
+  ) {}
+  async create(createAlbumDto: CreateAlbumDto) {
+    const album = this.albumRepository.create({ ...createAlbumDto });
 
-    return album;
+    return this.albumRepository.save(album);
   }
 
-  findAll() {
-    return this.db.albums;
+  async findAll() {
+    return this.albumRepository.find();
   }
 
-  findOne(id: string) {
-    const album = this.db.albums.find((album) => album.id === id);
-
-    return album;
+  async findOne(id: string) {
+    return this.albumRepository.findOneBy({ id });
   }
 
-  update(id: string, updateAlbumDto: UpdateAlbumDto) {
-    let updatedAlbum: Album;
-
-    this.db.albums = this.db.albums.map(({ ...album }) => {
-      if (album.id === id) {
-        updatedAlbum = {
-          ...album,
-          ...updateAlbumDto,
-        };
-
-        return updatedAlbum;
-      }
-
-      return album;
+  async update(id: string, updateAlbumDto: UpdateAlbumDto) {
+    const album = await this.albumRepository.preload({
+      id,
+      ...updateAlbumDto,
     });
 
-    return updatedAlbum;
+    return this.albumRepository.save(album);
   }
 
-  remove(id: string) {
-    this.db.albums = this.db.albums.filter((album) => album.id !== id);
-  }
-
-  async removeDependencies<T extends keyof Album>(dependency: T, id: string) {
-    this.db.albums.forEach((album) => {
-      if (album[dependency] === id) album[dependency] = null;
-    });
+  async remove(album: Album) {
+    await this.albumRepository.remove(album);
   }
 }

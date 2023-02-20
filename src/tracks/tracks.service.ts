@@ -1,59 +1,46 @@
 import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'crypto';
-import { DbService } from 'src/db/db.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './entities/track.entity';
 
 @Injectable()
 export class TracksService {
-  constructor(private readonly db: DbService) {}
-  create(createTrackDto: CreateTrackDto) {
-    const track: Track = {
-      ...createTrackDto,
-      id: randomUUID(),
-    };
-    this.db.tracks.push(track);
+  constructor(
+    @InjectRepository(Track)
+    private readonly trackRepository: Repository<Track>,
+  ) {}
+  async create(createTrackDto: CreateTrackDto) {
+    const track = this.trackRepository.create({ ...createTrackDto });
 
-    return track;
+    return this.trackRepository.save(track);
   }
 
   async findAll() {
-    return this.db.tracks;
+    return this.trackRepository.find();
   }
 
-  findOne(id: string) {
-    const track = this.db.tracks.find((track) => track.id === id);
-
-    return track;
+  async findOne(id: string) {
+    return this.trackRepository.findOneBy({ id });
   }
 
   async update(id: string, updateTrackDto: UpdateTrackDto) {
-    let updatedTrack: Track;
-
-    this.db.tracks = this.db.tracks.map(({ ...track }) => {
-      if (track.id === id) {
-        updatedTrack = {
-          ...track,
-          ...updateTrackDto,
-        };
-
-        return updatedTrack;
-      }
-
-      return track;
+    const track = await this.trackRepository.preload({
+      id,
+      ...updateTrackDto,
     });
 
-    return updatedTrack;
+    return this.trackRepository.save(track);
   }
 
-  async remove(id: string) {
-    this.db.tracks = this.db.tracks.filter((track) => track.id !== id);
+  async remove(track: Track) {
+    await this.trackRepository.remove(track);
   }
 
-  async removeDependencies<T extends keyof Track>(dependency: T, id: string) {
-    this.db.tracks.forEach((track) => {
-      if (track[dependency] === id) track[dependency] = null;
-    });
-  }
+  // async removeDependencies<T extends keyof Track>(dependency: T, id: string) {
+  //   this.db.tracks.forEach((track) => {
+  //     if (track[dependency] === id) track[dependency] = null;
+  //   });
+  // }
 }

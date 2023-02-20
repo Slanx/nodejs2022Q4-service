@@ -1,13 +1,13 @@
-import { IsUUID, IsBoolean, IsString, IsNotEmpty } from 'class-validator';
+import { PrimaryGeneratedColumn, Column, Entity } from 'typeorm';
 
+@Entity()
 export class Artist {
-  @IsUUID()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @Column()
   name: string;
 
-  @IsBoolean()
+  @Column()
   grammy: boolean;
 }
