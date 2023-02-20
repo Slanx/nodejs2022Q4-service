@@ -1,9 +1,11 @@
-import { Artist } from 'src/artists/entities/artist.entity';
-import { Track } from 'src/tracks/entities/track.entity';
-import { Album } from 'src/albums/entities/album.entity';
+import {
+  FavoritesAlbums,
+  FavoritesArtists,
+  FavoritesTracks,
+} from '../entities/favorite.entity';
 
 export class GetFavoritesDto {
-  artists?: Artist[];
-  albums?: Album[];
-  tracks?: Track[];
+  artists?: FavoritesArtists[];
+  albums?: FavoritesAlbums[];
+  tracks?: FavoritesTracks[];
 }
