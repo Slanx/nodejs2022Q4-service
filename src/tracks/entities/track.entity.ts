@@ -20,10 +20,10 @@ export class Track {
   duration: number;
 
   @Column({ nullable: true })
-  artistId: Artist['id'] | null;
+  artistId: string | null;
 
   @Column({ nullable: true })
-  albumId: Album['id'] | null;
+  albumId: string | null;
 
   @ManyToOne(() => Artist, {
     nullable: true,

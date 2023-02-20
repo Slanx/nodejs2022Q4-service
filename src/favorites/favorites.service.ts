@@ -25,9 +25,7 @@ export class FavoritesService {
     private readonly trackFavoritesRepository: Repository<FavoritesTracks>,
 
     private readonly artistsService: ArtistsService,
-
     private readonly albumsService: AlbumsService,
-
     private readonly tracksService: TracksService,
   ) {}
 
@@ -74,7 +72,9 @@ export class FavoritesService {
   }
 
   async removeTrack(id: string) {
-    const track = await this.trackFavoritesRepository.findOneBy({ id });
+    const track = await this.trackFavoritesRepository.findOneBy({
+      tracks: { id },
+    });
 
     if (!track) {
       throw new NotFoundException(
@@ -86,7 +86,9 @@ export class FavoritesService {
   }
 
   async removeArtist(id: string) {
-    const artist = await this.artistFavoritesRepository.findOneBy({ id });
+    const artist = await this.artistFavoritesRepository.findOneBy({
+      artists: { id },
+    });
 
     if (!artist) {
       throw new NotFoundException(
@@ -98,7 +100,9 @@ export class FavoritesService {
   }
 
   async removeAlbum(id: string) {
-    const album = await this.albumFavoritesRepository.findOneBy({ id });
+    const album = await this.albumFavoritesRepository.findOneBy({
+      albums: { id },
+    });
 
     if (!album) {
       throw new NotFoundException(
@@ -128,6 +132,10 @@ export class FavoritesService {
       }),
     ]);
 
-    return { artists, albums, tracks };
+    return {
+      artists: artists.map(({ artists }) => artists),
+      albums: albums.map(({ albums }) => albums),
+      tracks: tracks.map(({ tracks }) => tracks),
+    };
   }
 }
