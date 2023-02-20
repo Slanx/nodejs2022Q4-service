@@ -9,7 +9,6 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { FavoritesService } from './favorites.service';
-import { GetFavoritesDto } from './dto/get-favorite.dto';
 
 @Controller('favs')
 export class FavoritesController {
@@ -24,7 +23,7 @@ export class FavoritesController {
   @Post('album/:id')
   @HttpCode(HttpStatus.CREATED)
   async addAlbum(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-    return this.favoritesService.addTrack(id);
+    return this.favoritesService.addAlbum(id);
   }
 
   @Post('artist/:id')
@@ -36,7 +35,7 @@ export class FavoritesController {
   }
 
   @Get()
-  async findAll(): Promise<GetFavoritesDto> {
+  async findAll() {
     return this.favoritesService.findAll();
   }
 

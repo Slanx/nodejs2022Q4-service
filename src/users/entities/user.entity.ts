@@ -1,4 +1,4 @@
-import { Exclude } from 'class-transformer';
+import { Exclude, Transform } from 'class-transformer';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -24,10 +24,12 @@ export class User {
   version: number;
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  @Transform(({ value }) => new Date(value).getTime())
+  createdAt: number;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  @Transform(({ value }) => new Date(value).getTime())
+  updatedAt: number;
 
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);

@@ -37,10 +37,4 @@ export class TracksService {
   async remove(track: Track) {
     await this.trackRepository.remove(track);
   }
-
-  // async removeDependencies<T extends keyof Track>(dependency: T, id: string) {
-  //   this.db.tracks.forEach((track) => {
-  //     if (track[dependency] === id) track[dependency] = null;
-  //   });
-  // }
 }
