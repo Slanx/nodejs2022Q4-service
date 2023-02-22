@@ -39,6 +39,12 @@ To create a docker image and container, use
 docker-compose up
 ```
 
+To scan image :
+
+```
+npm run docker:scan
+```
+
 After this you can check tests:
 
 ```
