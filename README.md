@@ -31,6 +31,13 @@ For more information about OpenAPI/Swagger please visit https://swagger.io/.
 
 You can open Swagger Doc: http://localhost:4000(PORT)/doc
 
+## Docker :
+
+`docker-compose up`
+
+After this you can check tests:
+`npm run test`
+
 ## Testing
 
 After application running open new terminal and enter:
