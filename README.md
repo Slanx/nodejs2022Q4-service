@@ -33,10 +33,17 @@ You can open Swagger Doc: http://localhost:4000(PORT)/doc
 
 ## Docker :
 
-`docker-compose up`
+To create a docker image and container, use
+
+```
+docker-compose up
+```
 
 After this you can check tests:
-`npm run test`
+
+```
+npm run test
+```
 
 ## Testing
 
