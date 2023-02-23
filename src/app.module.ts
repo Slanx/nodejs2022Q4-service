@@ -18,7 +18,6 @@ import { dataSourceOptions } from './db/data-source';
     AlbumsModule,
     FavoritesModule,
     ConfigModule.forRoot({
-      isGlobal: true,
       envFilePath: '.env',
     }),
     TypeOrmModule.forRoot(dataSourceOptions),
