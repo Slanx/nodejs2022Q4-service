@@ -30,6 +30,12 @@ export class UsersService {
     return user;
   }
 
+  async findOneByLogin(login: string) {
+    const user = await this.userRepository.findOneBy({ login });
+
+    return user;
+  }
+
   async update(id: string, updatePasswordDto: UpdatePasswordDto) {
     const user = await this.userRepository.preload({
       id,

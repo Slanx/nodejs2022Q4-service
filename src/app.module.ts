@@ -9,6 +9,7 @@ import { FavoritesModule } from './favorites/favorites.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { dataSourceOptions } from './db/data-source';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -17,7 +18,9 @@ import { dataSourceOptions } from './db/data-source';
     TracksModule,
     AlbumsModule,
     FavoritesModule,
+    AuthModule,
     ConfigModule.forRoot({
+      isGlobal: true,
       envFilePath: '.env',
     }),
     TypeOrmModule.forRoot(dataSourceOptions),
