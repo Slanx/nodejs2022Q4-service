@@ -10,9 +10,9 @@ import {
 } from './entities/favorite.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ArtistsService } from 'src/artists/artists.service';
-import { AlbumsService } from 'src/albums/albums.service';
-import { TracksService } from 'src/tracks/tracks.service';
+import { ArtistsService } from 'src/modules/artists/artists.service';
+import { AlbumsService } from 'src/modules/albums/albums.service';
+import { TracksService } from 'src/modules/tracks/tracks.service';
 
 @Injectable()
 export class FavoritesService {

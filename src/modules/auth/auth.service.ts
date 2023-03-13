@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { hash, genSaltSync, compare } from 'bcrypt';
 import { JwtPayload } from 'jsonwebtoken';
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { UsersService } from 'src/users/users.service';
+import { CreateUserDto } from 'src/modules/users/dto/create-user.dto';
+import { UsersService } from 'src/modules/users/users.service';
 import { UpdateTokenDto } from './dto/update-token.dto';
 import { TokenService } from './token.service';
 

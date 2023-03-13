@@ -7,9 +7,9 @@ import {
   FavoritesArtists,
   FavoritesTracks,
 } from './entities/favorite.entity';
-import { AlbumsModule } from 'src/albums/albums.module';
-import { ArtistsModule } from 'src/artists/artists.module';
-import { TracksModule } from 'src/tracks/tracks.module';
+import { AlbumsModule } from 'src/modules/albums/albums.module';
+import { ArtistsModule } from 'src/modules/artists/artists.module';
+import { TracksModule } from 'src/modules/tracks/tracks.module';
 
 @Module({
   imports: [

@@ -15,7 +15,7 @@ import { TracksService } from './tracks.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { UseGuards } from '@nestjs/common/decorators/core/use-guards.decorator';
-import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { JwtAuthGuard } from 'src/modules/auth/guards/jwt.guard';
 
 @Controller('track')
 @UseGuards(JwtAuthGuard)
