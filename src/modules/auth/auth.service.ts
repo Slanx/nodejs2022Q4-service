@@ -1,12 +1,17 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { hash, genSaltSync, compare } from 'bcrypt';
 import { JwtPayload } from 'jsonwebtoken';
 import { CreateUserDto } from 'src/modules/users/dto/create-user.dto';
 import { UsersService } from 'src/modules/users/users.service';
-import { UpdateTokenDto } from './dto/update-token.dto';
-import { TokenService } from './token.service';
+import { UpdateTokenDto } from 'src/modules/token/dto/update-token.dto';
+import { TokenService } from 'src/modules/token/token.service';
+import { RefreshToken } from '../token/entities/refreshToken.entity';
 
 @Injectable()
 export class AuthService {
@@ -18,9 +23,17 @@ export class AuthService {
   ) {}
 
   async signUp(createUserDto: CreateUserDto) {
+    const { login, password } = createUserDto;
+
+    const user = await this.usersService.findOneByLogin(login);
+
+    if (user) {
+      throw new BadRequestException('User already exists with this login');
+    }
+
     const saltRounds = Number(this.configService.get<string>('CRYPT_SALT'));
     const salt = genSaltSync(saltRounds);
-    const hashPassword = await hash(createUserDto.password, salt);
+    const hashPassword = await hash(password, salt);
 
     return this.usersService.create({
       ...createUserDto,
@@ -57,9 +70,11 @@ export class AuthService {
   private async validateUser(login: string, password: string) {
     const user = await this.usersService.findOneByLogin(login);
 
+    if (!user) return null;
+
     const isPasswordMatch = await compare(password, user.password);
 
-    if (!user && !isPasswordMatch) return null;
+    if (!isPasswordMatch) return null;
 
     return user;
   }
@@ -100,5 +115,9 @@ export class AuthService {
       accessToken: newTokens.accessToken,
       refreshToken: newTokens.refreshToken,
     };
+  }
+
+  async remove(refreshToken: RefreshToken['token']) {
+    await this.tokenService.remove(refreshToken);
   }
 }

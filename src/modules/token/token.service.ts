@@ -36,7 +36,7 @@ export class TokenService {
     return this.tokenRepository.save(refreshToken);
   }
 
-  async remove(refreshToken: RefreshToken) {
-    await this.tokenRepository.remove(refreshToken);
+  async remove(refreshToken: RefreshToken['token']) {
+    this.tokenRepository.delete({ token: refreshToken });
   }
 }

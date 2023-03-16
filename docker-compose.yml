@@ -12,7 +12,8 @@ services:
     env_file:
       - .env
     volumes:
-      - ./src:/app/src
+      - ./src:/usr/src/app/src
+      - ./logs:/usr/src/app/logs
     restart: always
   db:
     container_name: db
