@@ -6,7 +6,6 @@ import {
   Put,
   Param,
   Delete,
-  NotFoundException,
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
@@ -31,13 +30,7 @@ export class AlbumsController {
 
   @Get(':id')
   async findOne(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-    const album = await this.albumsService.findOne(id);
-
-    if (!album) {
-      throw new NotFoundException('This track does not exist');
-    }
-
-    return album;
+    return this.albumsService.findOne(id);
   }
 
   @Put(':id')
@@ -47,21 +40,13 @@ export class AlbumsController {
   ) {
     const album = await this.albumsService.findOne(id);
 
-    if (!album) {
-      throw new NotFoundException('This album does not exist');
-    }
-
-    return this.albumsService.update(id, updateAlbumDto);
+    return this.albumsService.update(album.id, updateAlbumDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     const album = await this.albumsService.findOne(id);
-
-    if (!album) {
-      throw new NotFoundException('This album does not exist');
-    }
 
     await this.albumsService.remove(album);
   }

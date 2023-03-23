@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateAlbumDto } from './dto/create-album.dto';
@@ -22,7 +22,13 @@ export class AlbumsService {
   }
 
   async findOne(id: string) {
-    return this.albumRepository.findOneBy({ id });
+    const album = this.albumRepository.findOneBy({ id });
+
+    if (!album) {
+      throw new NotFoundException('This track does not exist');
+    }
+
+    return album;
   }
 
   async update(id: string, updateAlbumDto: UpdateAlbumDto) {

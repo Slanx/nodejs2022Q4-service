@@ -5,11 +5,10 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { hash, genSaltSync, compare } from 'bcrypt';
+import { compare } from 'bcrypt';
 import { JwtPayload } from 'jsonwebtoken';
 import { CreateUserDto } from 'src/modules/users/dto/create-user.dto';
 import { UsersService } from 'src/modules/users/users.service';
-import { UpdateTokenDto } from 'src/modules/token/dto/update-token.dto';
 import { TokenService } from 'src/modules/token/token.service';
 import { RefreshToken } from '../token/entities/refreshToken.entity';
 
@@ -23,22 +22,13 @@ export class AuthService {
   ) {}
 
   async signUp(createUserDto: CreateUserDto) {
-    const { login, password } = createUserDto;
-
-    const user = await this.usersService.findOneByLogin(login);
+    const user = await this.usersService.findOneByLogin(createUserDto.login);
 
     if (user) {
       throw new BadRequestException('User already exists with this login');
     }
 
-    const saltRounds = Number(this.configService.get<string>('CRYPT_SALT'));
-    const salt = genSaltSync(saltRounds);
-    const hashPassword = await hash(password, salt);
-
-    return this.usersService.create({
-      ...createUserDto,
-      password: hashPassword,
-    });
+    return this.usersService.create(createUserDto);
   }
 
   async login(createUserDto: CreateUserDto) {
@@ -54,16 +44,13 @@ export class AuthService {
     const isTokenExist = await this.tokenService.findByUserId(validUser.id);
 
     if (isTokenExist) {
-      await this.tokenService.update(isTokenExist.id, {
-        token: tokens.refreshToken,
-      });
+      await this.tokenService.update(tokens.refreshToken, validUser.id);
     } else {
       await this.tokenService.create({
         token: tokens.refreshToken,
         user: validUser,
       });
     }
-
     return tokens;
   }
 
@@ -100,16 +87,12 @@ export class AuthService {
     };
   }
 
-  async refresh(updateTokenDto: UpdateTokenDto) {
-    const refreshToken = await this.tokenService.find(updateTokenDto.token);
-
-    if (!refreshToken) throw new ForbiddenException('Refresh token is invalid');
+  async refresh(token: string, userId: string) {
+    const refreshToken = await this.tokenService.find(token);
 
     const newTokens = await this.generateTokens(refreshToken.userId);
 
-    await this.tokenService.update(refreshToken.id, {
-      token: newTokens.refreshToken,
-    });
+    await this.tokenService.update(newTokens.refreshToken, userId);
 
     return {
       accessToken: newTokens.accessToken,

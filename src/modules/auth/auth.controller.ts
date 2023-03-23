@@ -8,17 +8,24 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  Request,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 import { Public } from 'src/common/decorators/public';
 import { CreateUserDto } from 'src/modules/users/dto/create-user.dto';
 import { AuthService } from './auth.service';
-import { UpdateTokenDto } from 'src/modules/token/dto/update-token.dto';
 import { RefreshGuard } from './guards/refresh.guard';
-import { RefreshToken } from '../token/entities/refreshToken.entity';
+import { convertToMs } from 'src/utils/convertToMs';
+import { RequestWithUser } from './interfaces/requestWithUser';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Public()
   @UseInterceptors(ClassSerializerInterceptor)
@@ -30,22 +37,56 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  login(@Body() createUserDto: CreateUserDto) {
-    return this.authService.login(createUserDto);
+  async login(
+    @Body() createUserDto: CreateUserDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const { accessToken, refreshToken } = await this.authService.login(
+      createUserDto,
+    );
+
+    response.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      maxAge: convertToMs(
+        this.configService.get<string>('TOKEN_REFRESH_EXPIRE_TIME'),
+      ),
+    });
+    return { accessToken };
   }
 
   @Public()
   @UseGuards(RefreshGuard)
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  refresh(@Body() updateTokenDto: UpdateTokenDto) {
-    return this.authService.refresh(updateTokenDto);
+  async refresh(
+    @Request() req: RequestWithUser,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const { accessToken, refreshToken } = await this.authService.refresh(
+      req.user.refreshToken,
+      req.user.userId,
+    );
+
+    response.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      maxAge: convertToMs(
+        this.configService.get<string>('TOKEN_REFRESH_EXPIRE_TIME'),
+      ),
+    });
+
+    return { accessToken };
   }
 
+  @Public()
   @UseGuards(RefreshGuard)
-  @Delete('refresh')
+  @Delete('logaut')
   @HttpCode(HttpStatus.NO_CONTENT)
-  logaut(@Body() { token }: Pick<RefreshToken, 'token'>) {
-    return this.authService.remove(token);
+  async logaut(
+    @Request() req: RequestWithUser,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    await this.authService.remove(req.user.refreshToken);
+
+    response.clearCookie('refreshToken');
   }
 }

@@ -6,7 +6,6 @@ import {
   Put,
   Param,
   Delete,
-  NotFoundException,
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
@@ -31,13 +30,7 @@ export class TracksController {
 
   @Get(':id')
   async findOne(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-    const track = await this.tracksService.findOne(id);
-
-    if (!track) {
-      throw new NotFoundException('This track does not exist');
-    }
-
-    return track;
+    return this.tracksService.findOne(id);
   }
 
   @Put(':id')
@@ -47,21 +40,13 @@ export class TracksController {
   ) {
     const track = await this.tracksService.findOne(id);
 
-    if (!track) {
-      throw new NotFoundException('This track does not exist');
-    }
-
-    return this.tracksService.update(id, updateTrackDto);
+    return this.tracksService.update(track.id, updateTrackDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     const track = await this.tracksService.findOne(id);
-
-    if (!track) {
-      throw new NotFoundException('This track does not exist');
-    }
 
     await this.tracksService.remove(track);
   }

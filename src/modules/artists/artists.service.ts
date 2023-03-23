@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateArtistDto } from './dto/create-artist.dto';
@@ -22,7 +22,13 @@ export class ArtistsService {
   }
 
   async findOne(id: string) {
-    return this.artistRepository.findOneBy({ id });
+    const artist = await this.artistRepository.findOneBy({ id });
+
+    if (!artist) {
+      throw new NotFoundException('This artist does not exist');
+    }
+
+    return artist;
   }
 
   async update(id: string, updateArtistDto: UpdateArtistDto) {

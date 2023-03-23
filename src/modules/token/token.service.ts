@@ -1,8 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateTokenDto } from './dto/create-token.dto';
-import { UpdateTokenDto } from './dto/update-token.dto';
 import { RefreshToken } from './entities/refreshToken.entity';
 
 @Injectable()
@@ -13,7 +12,11 @@ export class TokenService {
   ) {}
 
   async find(token: string) {
-    return this.tokenRepository.findOneBy({ token });
+    const refreshToken = await this.tokenRepository.findOneBy({ token });
+
+    if (!refreshToken) throw new ForbiddenException('Refresh token is invalid');
+
+    return refreshToken;
   }
 
   async findByUserId(userId: string) {
@@ -28,8 +31,8 @@ export class TokenService {
     return this.tokenRepository.save(refreshToken);
   }
 
-  async update(id: string, { token }: UpdateTokenDto) {
-    const refreshToken = await this.tokenRepository.findOneBy({ id });
+  async update(token: string, userId: string) {
+    const refreshToken = await this.tokenRepository.findOneBy({ userId });
 
     refreshToken.token = token;
 

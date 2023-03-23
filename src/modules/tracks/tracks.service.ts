@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateTrackDto } from './dto/create-track.dto';
@@ -22,7 +22,13 @@ export class TracksService {
   }
 
   async findOne(id: string) {
-    return this.trackRepository.findOneBy({ id });
+    const track = this.trackRepository.findOneBy({ id });
+
+    if (!track) {
+      throw new NotFoundException('This track does not exist');
+    }
+
+    return track;
   }
 
   async update(id: string, updateTrackDto: UpdateTrackDto) {

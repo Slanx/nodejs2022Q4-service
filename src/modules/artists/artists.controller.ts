@@ -6,7 +6,6 @@ import {
   Put,
   Param,
   Delete,
-  NotFoundException,
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
@@ -32,13 +31,7 @@ export class ArtistsController {
 
   @Get(':id')
   async findOne(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-    const artist = await this.artistsService.findOne(id);
-
-    if (!artist) {
-      throw new NotFoundException('This artist does not exist');
-    }
-
-    return artist;
+    return this.artistsService.findOne(id);
   }
 
   @Put(':id')
@@ -48,21 +41,13 @@ export class ArtistsController {
   ) {
     const artist = await this.artistsService.findOne(id);
 
-    if (!artist) {
-      throw new NotFoundException('This artist does not exist');
-    }
-
-    return this.artistsService.update(id, updateArtistDto);
+    return this.artistsService.update(artist.id, updateArtistDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     const artist = await this.artistsService.findOne(id);
-
-    if (!artist) {
-      throw new NotFoundException('This artist does not exist');
-    }
 
     await this.artistsService.remove(artist);
   }

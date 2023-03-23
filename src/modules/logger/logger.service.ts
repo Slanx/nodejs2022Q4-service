@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  LoggerService as NestLoggerService,
-  LogLevel,
-} from '@nestjs/common';
+import { Injectable, LogLevel, ConsoleLogger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { appendFileSync, mkdirSync, renameSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -12,10 +8,11 @@ const DEFAULT_LOG_FILE_SIZE = 5;
 const logLevels: LogLevel[] = ['error', 'warn', 'log', 'debug', 'verbose'];
 
 @Injectable()
-export class LoggerService implements NestLoggerService {
+export class LoggerService extends ConsoleLogger {
   private logLevel: number;
 
   constructor(private readonly configService: ConfigService) {
+    super();
     const currentLevel = this.configService.get<LogLevel>('LOG_LEVEL');
     this.logLevel = logLevels.indexOf(currentLevel);
   }
@@ -41,10 +38,12 @@ export class LoggerService implements NestLoggerService {
 
     if (levelMethod > this.logLevel) return;
 
+    super[level](message);
+
     const logLine =
       `[${level.toUpperCase()}]: ${message} ${optionalParams.join(' ')}` + '\n';
 
-    process.stdout.write(logLine);
+    // process.stdout.write(logLine);
 
     this.writeToFile(level, logLine);
   }

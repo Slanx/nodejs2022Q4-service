@@ -5,7 +5,6 @@ import { UsersModule } from 'src/modules/users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './straregies/jwt.strategy';
-import { TokenService } from 'src/modules/token/token.service';
 import { RefreshStrategy } from './straregies/refresh.strategy';
 import { TokenModule } from 'src/modules/token/token.module';
 

@@ -6,8 +6,6 @@ import {
   Put,
   Param,
   Delete,
-  NotFoundException,
-  ForbiddenException,
   UseInterceptors,
   ClassSerializerInterceptor,
   HttpCode,
@@ -37,13 +35,7 @@ export class UsersController {
   @UseInterceptors(ClassSerializerInterceptor)
   @Get(':id')
   async findOne(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-    const user = await this.usersService.findOne(id);
-
-    if (!user) {
-      throw new NotFoundException('This user does not exist');
-    }
-
-    return user;
+    return this.usersService.findOne(id);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
@@ -52,16 +44,6 @@ export class UsersController {
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ) {
-    const user = await this.usersService.findOne(id);
-
-    if (!user) {
-      throw new NotFoundException('This user does not exist');
-    }
-
-    if (user.password !== updatePasswordDto.oldPassword) {
-      throw new ForbiddenException('Invalid password');
-    }
-
     return await this.usersService.update(id, updatePasswordDto);
   }
 
@@ -69,10 +51,6 @@ export class UsersController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     const user = await this.usersService.findOne(id);
-
-    if (!user) {
-      throw new NotFoundException('This user does not exist');
-    }
 
     await this.usersService.remove(user);
   }
